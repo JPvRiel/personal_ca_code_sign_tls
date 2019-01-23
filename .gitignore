@@ -1,0 +1,10 @@
+*.pem
+*.crt
+*.pfx
+*.p12
+ca
+csr
+certs
+private
+pfx
+vars.env
