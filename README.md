@@ -218,9 +218,9 @@ certutil -d /home/a211278l/.pki/nssdb -L -n personal_root_ca
 As per `-t trustargs` described by [NSS Tools certutil
 ](https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS/tools/NSS_Tools_certutil):
 
-> c    Valid CA
-> T    Trusted CA to issue client certificates (implies c)
-> C    Trusted CA to issue server certificates (SSL only)
+> - c    Valid CA
+> - T    Trusted CA to issue client certificates (implies c)
+> - C    Trusted CA to issue server certificates (SSL only)
 
 Note the output of `certutil -d /home/a211278l/.pki/nssdb -L -n personal_root_ca` option helps confirm:
 
