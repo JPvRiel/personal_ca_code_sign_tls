@@ -1,80 +1,80 @@
-# Personal X509 certficates for code signing and TLS authentication testing
+# Personal X509 certificates for code signing and TLS authentication testing
 
-TL;DR: This project uses bash shell scripts and openssl to setup a small Personal CA to issue code signing and TLS localhost cerfifcates. A personal CA is used instead of simple self-signed certs because recent Chrome and Firefox browsers take exception to using self-signed certs for TLS authentication, even when the self-signed cert is included in the browser trust store.
+TL;DR: This project uses bash shell scripts and OpenSSL to setup a small Personal CA to issue code signing and TLS localhost certificates. A personal CA is used instead of simple self-signed certs because recent Chrome and Firefox browsers take exception to using self-signed certs for TLS authentication, even when the self-signed cert is included in the browser trust store.
 
-Possbile alternatives include running your own personal CA software such as [xca](https://github.com/chris2511/xca), or [tinyca](https://opsec.eu/src/tinyca/) (but seems unmaintained), etc.
+Possible alternatives include running your own personal CA software such as [xca](https://github.com/chris2511/xca), or [tinyca](https://opsec.eu/src/tinyca/) (but seems un-maintained), etc.
 
 ## Overview
 
-For local use, self-signed certifcates used to be a quick and useful alternative to the overhead (and possbile cost) involved in obtaining 3rd party CA signed certs. However:
+For local use, self-signed certificates used to be a quick and useful alternative to the overhead (and possbile cost) involved in obtaining 3rd party CA signed certs. However:
 
-- NSS (Network Security Services) used by Chrome and Firefox no longer trust a certifcate as a CA for issuing TLS certifcates when it also includes X509v3 extended key usage attributes.
+- NSS (Network Security Services) used by Chrome and Firefox no longer trust a certificate as a CA for issuing TLS certificates when it also includes X509v3 extended key usage attributes.
 - Even when "Any Extended Key Usage" is included in the self-signed cert, as per RFC 5280, NSS won't allow the cert to be used for TLS authentication.
 
-An alternate approach is to run your own minimal seperate CA root authority to sign certifcates with specific purposes for TLS authentication or code signing. 
+An alternate approach is to run your own minimal separate CA root authority to sign certificates with specific purposes for TLS authentication or code signing. 
 
-Since a mimimal CA hirarchy is used, certifcates for specific purposes can be issued:
+Since a minimal CA hierarchy is used, certificates for specific purposes can be issued:
 
 - Code signing cert (e.g. sign local powershell scripts)
 - Local TLS client and server (e.g. test on `localhost` address)
 
 ### Code signing
 
-#### Powershell digitial signatures
+#### Powershell digital signatures
 
-A common convenience and work-arround when developing powershell scripts may be:
+A common convenience and work-around when developing powershell scripts may be:
 
-```
+```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 ```
 
-Nontheless, the `Set-AuthenticodeSignature` can sign the script or powershell module with a certifcate that has both the 'digital signature' key usage and the 'code signing' extended key usage attributes set. 
+Nonetheless, the `Set-AuthenticodeSignature` can sign the script or powershell module with a certificate that has both the 'digital signature' key usage and the 'code signing' extended key usage attributes set.
 
-The code signing certifcate needs to inlcuded in the "Trusted Publishers" certficate store container along with the CA being included in the "Trusted Root Certification Authorities" (or the 3rd-Pary and Intermediary CA containers might work as well depending on the CA that signed the code singing cert).
+The code signing certificate needs to included in the "Trusted Publishers" certificate store container along with the CA being included in the "Trusted Root Certification Authorities" (or the 3rd-Party and Intermediary CA containers might work as well depending on the CA that signed the code singing cert).
 
-Public CA's do offer code signing certifcates.
+Public CA's do offer code signing certificates.
 
 #### Windows executable signatures
 
-[SignTool.exe (Sign Tool)](https://docs.microsoft.com/en-us/dotnet/framework/tools/signtool-exe) can be used to digitally sign executables.
+[SignTool.exe (Sign Tool)](https://docs.microsoft.com/en-us/dotnet/framework/tools/signtool-exe) can be used to digitally sign an executable.
 
-Windows Defender Application Control can leverage code singing certficates. See
+Windows Defender Application Control can leverage code singing certificates. See
 [Use code signing to simplify application control for classic Windows applications](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/use-code-signing-to-simplify-application-control-for-classic-windows-applications)
 
 #### Linux secure boot and executable digital signatures and hashes
 
-Due to UEFI superceeding BIOS for trusted boot protection against malware and rootkits, OS kernel boot binaries are typically signed. Linux distro's often have thier bootloaders signed by a CA. `pesign` caters for advanced Linux users who intend running secure boot with custom complied kernels or modules and this leverages a code singing certficate.
+Due to UEFI superceding BIOS for trusted boot protection against malware and rootkits, OS kernel boot binaries are typically signed. Linux distro's often have their boot-loaders signed by a CA. `pesign` caters for advanced Linux users who intend running secure boot with custom complied kernels or modules and this leverages a code singing certificate.
 
-As per [Does linux support signed binaries?](https://security.stackexchange.com/questions/138651/does-linux-support-signed-binaries), features to digtially singing executables on Linux hasn't been overly popular. But various efforts like the Integrity Measurement Architecture (IMA) and (EVM) are progressing to extend the protection of secure boot beyond just the initial UEFI bootloader. 
+As per [Does linux support signed binaries?](https://security.stackexchange.com/questions/138651/does-linux-support-signed-binaries), features to digitaly singing executables on Linux hasn't been overly popular. But various efforts like the Integrity Measurement Architecture (IMA) and (EVM) are progressing to extend the protection of secure boot beyond just the initial UEFI boot-loader. 
 
-Relagted:
+Related:
 
 - [Ubuntu Wiki: SecureBoot](https://wiki.ubuntu.com/UEFI/SecureBoot)
 - [Ubuntu Blog: How to sign things for Secure Boot](https://blog.ubuntu.com/2017/08/11/how-to-sign-things-for-secure-boot)
-- [RedHat: Signing Kernel Modules for Secure Boot ](https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Kernel_Administration_Guide/sect-signing-kernel-modules-for-secure-boot.html)
+- [RedHat: Signing Kernel Modules for Secure Boot](https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Kernel_Administration_Guide/sect-signing-kernel-modules-for-secure-boot.html)
 - [OpenSUSE SDB:IMA EVM](https://en.opensuse.org/SDB:Ima_evm)
-- [Linux Kerenel Intergrity](https://kernsec.org/wiki/index.php/Linux_Kernel_Integrity)
+- [Linux Kernel Integrity](https://kernsec.org/wiki/index.php/Linux_Kernel_Integrity)
 - [Extending Linux Executable Logging With The Integrity Measurement Architecture](https://www.fireeye.com/blog/threat-research/2016/11/extending_linux_exec.html)
 
 As per SUSE docs:
 
 > IMA cares about the actual file content while EVM cares about the metadata
 
-#### Linux deb and rpm pacakge distribution digtial signatures
+#### Linux deb and rpm package distribution digital signatures
 
-Ubuntu/Debian apt (`.deb`) and "Enterprise Linux" (RedHat) (`.rpm`) doesn't use X509 certifcates and hirarchical PKI certficate authorities to sign packages. Instead, GPG (GNU Privacy Guard), which follows OpenPGP standards that are "web-of-trust" based, is used. See [SecureApt](https://wiki.debian.org/SecureApt) whereby distributions like Debian and Ubuntu use PGP keys to sign the release pacakges.
+Ubuntu/Debian apt (`.deb`) and "Enterprise Linux" (RedHat) (`.rpm`) doesn't use X509 certificates and hierarchical PKI certificate authorities to sign packages. Instead, GPG (GNU Privacy Guard), which follows OpenPGP standards that are "web-of-trust" based, is used. See [SecureApt](https://wiki.debian.org/SecureApt) whereby distributions like Debian and Ubuntu use PGP keys to sign the release packages.
 
-It would be possbile to use the same RSA private key and install the public key (not the certifcate) as trusted in order to sign and validate locally developed and packaged install files.
+It would be possible to use the same RSA private key and install the public key (not the certificate) as trusted in order to sign and validate locally developed and packaged install files.
 
-As packages update binaries, in practise they'd also need to update kernel based intergity checking features that might be used (i.e. IMA/EVM), otherwise integrity checks would fail after updates.
+As packages update binaries, in practice they'd also need to update kernel based integrity checking features that might be used (i.e. IMA/EVM), otherwise integrity checks would fail after updates.
 
-### TLS certficate authentication
+### TLS certificate authentication
 
-#### Background to certifcate key usage with Chrome and Firefox
+#### Background to certificate key usage with Chrome and Firefox
 
-Chrome (tested with v71) leverages NSS. NSS does not seem to accept TLS server authentication extended key usage if the certifcate is also a CA and simply gives a generic `NET::ERR_CERT_INVALID` error.
+Chrome (tested with v71) leverages NSS. NSS does not seem to accept TLS server authentication extended key usage if the certificate is also a CA and simply gives a generic `NET::ERR_CERT_INVALID` error.
 
-As per [Why does curl/NSS encryption library not allow a CA with the extended key usage by SEC_ERROR_INADEQUATE_CERT_TYPE?](https://security.stackexchange.com/questions/176177/why-does-curl-nss-encryption-library-not-allow-a-ca-with-the-extended-key-usage?), self-signed certificates can be problematic because implimentations like NSS impliment checks with a stict interpretation of RFC 5280's section, "4.2.1.12. Extended Key Usage". As per the RFC, "Extended Key Usage" is restricted as follows:
+As per [Why does curl/NSS encryption library not allow a CA with the extended key usage by SEC_ERROR_INADEQUATE_CERT_TYPE?](https://security.stackexchange.com/questions/176177/why-does-curl-nss-encryption-library-not-allow-a-ca-with-the-extended-key-usage?), self-signed certificates can be problematic because implementations like NSS implement checks with a strict interpretation of RFC 5280's section, "4.2.1.12. Extended Key Usage". As per the RFC, "Extended Key Usage" is restricted as follows:
 
 > In general, this extension will appear only in end entity certificates. [...]
 > 
@@ -82,38 +82,38 @@ As per [Why does curl/NSS encryption library not allow a CA with the extended ke
 > 
 > If a certificate contains both a key usage extension and an extended key usage extension, then both extensions MUST be processed independently and the certificate MUST only be used for a purpose consistent with both extensions.
 
-Even when testing with `anyExtendedKeyUsage`, Chrome and NSS did not accept the certficate for server authentication despite EKUs `serverAuth` and `anyExtendedKeyUsage` being present and compatible with `digitalSignature` key usage. Note, there's no apparent EKU that's consistant with `keyCertSign` key usage.
+Even when testing with `anyExtendedKeyUsage`, Chrome and NSS did not accept the certificate for server authentication despite EKUs `serverAuth` and `anyExtendedKeyUsage` being present and compatible with `digitalSignature` key usage. Note, there's no apparent EKU that's consistent with `keyCertSign` key usage.
 
-As of Firefox 64, it outright does not accept self signed certficates and provides a much clearer `MOZILLA_PKIX_ERROR_SELF_SIGNED_CERT` error message.
+As of Firefox 64, it outright does not accept self signed certificates and provides a much clearer `MOZILLA_PKIX_ERROR_SELF_SIGNED_CERT` error message.
 
 #### Insecure localhost testing
 
-While chromium/chrome will allow and treat `http://localhost` as a secure origin (as per [Prefer Secure Origins For Powerful New Features](http://www.chromium.org/Home/chromium-security/prefer-secure-origins-for-powerful-new-features)), this doens't allow for testing TLS functionality with `https://localhost`.
+While chromium/chrome will allow and treat `http://localhost` as a secure origin (as per [Prefer Secure Origins For Powerful New Features](http://www.chromium.org/Home/chromium-security/prefer-secure-origins-for-powerful-new-features)), this doesn't allow for testing TLS functionality with `https://localhost`.
 
 The `chrome://flags/#allow-insecure-localhost` is a convenience and security compromise:
 
-- It's possibly a fair work-arround if you'll be using an isolated testing only chrome profile.
+- It's possibly a fair work-around if you'll be using an isolated testing only chrome profile.
 - But it's not going to help understand and test basic TLS and X509 functionality on an app bound to localhost.
 
 #### 3rd party CAs and localhost
 
 Furthermore, a 3rd party CA must not issue a cert for 127.0.0.1 or localhost. As per [Let's encrypt - Certificates for localhost](https://letsencrypt.org/docs/certificates-for-localhost/)
 
-> Let’s Encrypt can’t provide certificates for “localhost” because nobody uniquely owns it, and it’s not rooted in a top level domain like “.com” or “.net”
+> Let's Encrypt can't provide certificates for "localhost" because nobody uniquely owns it, and it's not rooted in a top level domain like ".com" or ".net"
 
-## Personal certficate authority (CA)
+## Personal certificate authority (CA)
 
-Create an induvidual root CA for code signing or issueing other certs:
+Create an individual root CA for code signing or issuing other certs:
 
 - `.env` has has default settings used by scripts
   - Instead of using something sed/awk to modify a base openssl config file, openssl config is built and read in from the shell environment variables.
 - `CN=Personal Root CA` is the default simple distingushed name (DN)/subject applied unless env vars are set.
-- Creating an `vars.env` file allows for customising the location and parts of the certifcate subject (DN) such as location and organisation. For example, in vars.env, the following could be set:
+- Creating an `vars.env` file allows for customising the location and parts of the certificate subject (DN) such as location and organisation. For example, in vars.env, the following could be set:
   - `O=<legal entity name>`
   - `C=<2 letter country code>`
   - `ST=<State or province>`
   - `L=<location>`
-- Alternativly, instead of `vars.env`, directly control the subject/DN string by setting `ROOT_CA_DN` for the root authority and `DN` for the signed certifcates.
+- Alternatively, instead of `vars.env`, directly control the subject/DN string by setting `ROOT_CA_DN` for the root authority and `DN` for the signed certificates.
 - Exporting a `CA_PASSPHRASE` env var with spaces helps avoid exposing the password in bash history (assuming `HISTCONTROL=ignorespace` set).
 
 ```bash
@@ -127,7 +127,7 @@ Create a cert for personal code signing where `DN` env var or `vars.env` sourced
 - `CN="Personal Code Signing"` is the default common name if no `DN`, `CN` or `vars.env` apply.
 
 ```bash
-  export CODESIGN_PASSPHRASE='<your own passphrase to use when siging code with the private key>'
+  export CODESIGN_PASSPHRASE='<your own passphrase to use when singing code with the private key>'
 ./issue_code_sign_cert.sh
 ```
 
@@ -153,7 +153,7 @@ Create a cert for localhost TLS server or client authentication where `DN` env v
 ./issue_tls_local_cert.sh
 ```
 
-The certifcate subject alternative names and key usage extensions of interest (for use with localhost):
+The certificate subject alternative names and key usage extensions of interest (for use with localhost):
 
 ```console
         X509v3 extensions:
@@ -165,10 +165,10 @@ The certifcate subject alternative names and key usage extensions of interest (f
                 DNS:<HOSTNAME>, DNS:localhost, DNS:localhost.localdomain IP:127.0.0.1, IP Address:0:0:0:0:0:0:0:1
 ```
 
-For issued certficates, a PKCS12 export file format is also supplied:
+For issued certificates, a PKCS#12 export file format is also supplied:
 
-- Java and Windows crypto APIs import this format more simply (compared to seperate `.pem` files).
-- While openssl can export to PKCS#12 without a passphrase, the Java standard libraries and utilties don't function without passwords.
+- Java and Windows crypto APIs import this format more simply (compared to separate `.pem` files).
+- While openssl can export to PKCS#12 without a passphrase, the Java standard libraries and utilities don't function without passwords.
 
 References:
 
@@ -184,11 +184,11 @@ Reference:
 
 - [How to import CA root certificates on Linux and Windows](https://thomas-leister.de/en/how-to-import-ca-root-certificate/)
 
-#### Importing peronal CA into windows OS
+#### Importing personal CA into windows OS
 
 Running `certlm.msc` or double clicking the root CA `.der` file into "Trusted Root Certification Authorities" for the local computer if the scope is for all windows accounts including an Administrative context.
 
-Or via and administraetive powershell:
+Or via and administrative powershell:
 
 ```powershell
 Import-Certificate -FilePath .\personal_root_ca.cert.der -CertStoreLocation cert:\LocalMachine\Root
@@ -243,7 +243,7 @@ $ certutil -d sql:$HOME/.pki/nssdb -V -u L -n personal_root_ca
 certutil: certificate is valid
 ```
 
-Where the `-u L` flag checks if the CA is suitable for issuing TLS cerficates.
+Where the `-u L` flag checks if the CA is suitable for issuing TLS certificates.
 
 ### PowerShell digital signatures (code-signing) with a personal CA
 
@@ -267,9 +267,9 @@ To trust your personal code signing cert on the whole system:
 Import-Certificate -FilePath '.\Personal Code Signing.cert.der' -CertStoreLocation cert:\LocalMachine\TrustedPublisher
 ```
 
-#### Digtially signing a powershell script
+#### Digitaly signing a powershell script
 
-For ease of use, the private key and certifcate .pfx file can be imported into the personal store:
+For ease of use, the private key and certificate .pfx file can be imported into the personal store:
 
 ```powershell
 $passphrase = Get-Credential -User 'Code signing private key' -Message 'Passphrase for private key'
@@ -279,14 +279,14 @@ $codeCert = Get-Childitem cert:\CurrentUser\my -CodeSigning | ? { $_.Subject -im
 $codeCert.Thumbprint
 ```
 
-However, a secure and less convenient approach is to only load the code singing certifcate and private key when needed:
+However, a secure and less convenient approach is to only load the code singing certificate and private key when needed:
 
 ```powershell
 $passphrase = Get-Credential -User 'Code signing private key' -Message 'Passphrase for private key'
 $codeCert = Get-PfxCertificate -FilePath '~\Desktop\Personal Code Signing.pfx' -Password $passphrase.Password
 ```
 
-To recusivly sign all scripts (`.ps1`) and modules (`.psm1`) in a directory:
+To recursively sign all scripts (`.ps1`) and modules (`.psm1`) in a directory:
 
 ```powershell
 Get-ChildItem -Recurse -Path . -Include @('*.ps1','*.psm1') | Set-AuthenticodeSignature -Certificate $codeCert
@@ -319,23 +319,23 @@ kill $openssl_pid
 unset openssl_pid
 ```
 
-## Self-signed certficates (no seperate CA root)
+## Self-signed certificates (no separate CA root)
 
-Usign self-signed certficates without a CA chain appears simpler, but with the limitation of not working properly for browsers that raise exceptions about self-signed certficates used with TLS connections and various extended usage attributes causing conflicts.
+Self-signed certificates without a CA chain appears simpler, but with the limitation of not working properly for browsers that raise exceptions about self-signed certificates used with TLS connections and various extended usage attributes causing conflicts.
 
 ### Self-signed code signing cert
 
-If all that's required is a code signing certifcate, then self-signed could be a viable and miminmal way to go. You can set your own passphrase via `  export PASSPHRASE='<your passphrase>'`.
+If all that's required is a code signing certificate, then self-signed could be a viable and minimal way to go. You can set your own passphrase via `  export PASSPHRASE='<your passphrase>'`.
 
 ```bash
 ./self_signed/self_signed.sh
 ```
 
-Provided NSS or alternate libraies don't strictly check for key usage conflicts, the above might work well enough.
+Provided NSS or alternate libraries don't strictly check for key usage conflicts, the above might work well enough.
 
 ### Self-signed cert for TLS and code signing
 
-I did attempt to use a mult-purpose self signed cert. However, it was not possbile to get Chrome 71 to trust it.
+I did attempt to use a multipurpose self signed cert. However, it was not possible to get Chrome 71 to trust it.
 
 E.g. from the `self_signed_eg` directory:
 
@@ -345,7 +345,7 @@ E.g. from the `self_signed_eg` directory:
 
 The above cert has the right key and extended key ussage attributes set for TLS sever and client authentication as well as code signing.
 
-This can be improted into the local NSS database used by chrome.
+This can be imported into the local NSS database used by chrome.
 
 ```bash
 certutil -d sql:$HOME/.pki/nssdb -A -t 'CT,c,c' -n personal_self_signed -i $HOSTNAME.cert.pem
@@ -362,9 +362,9 @@ openssl_pid=$!
 openssl s_client -CAfile "$HOSTNAME.cert.pem" -connect 127.0.0.1:20443 < /dev/null
 ```
 
-The result I saw near the end of the output was `Verify return code: 0 (ok)`. So OpenSSL accepts the self-signed certficate as valid, but is more relaxed about key usage compared to NSS.
+The result I saw near the end of the output was `Verify return code: 0 (ok)`. So OpenSSL accepts the self-signed certificate as valid, but is more relaxed about key usage compared to NSS.
 
-Curl also works: (with a somewhat bening TLS connection termination error, but session establishment succeeded):
+Curl also works: (with a somewhat benign TLS connection termination error, but session establishment succeeded):
 
 ```console
 $ curl https://localhost:20443 -v -o /dev/null --cacert $HOSTNAME.cert.pem -w "# HTTP response code = %{response_code}\n"
@@ -397,7 +397,7 @@ As per [NSS and SSL Error Codes](https://www-archive.mozilla.org/projects/securi
 
 Futhermore, during testing, without `anyExtendedKeyUsage` set, error code `-8102` was also observed.
 
-NSS appears to distrust the certficate for use as a TLS sever because the extened key usage extensions conflicts with the CA basic usage. Note the condensed output seems to contradict this given usages of 'Digital Signature', 'Key Encipherment' and extended usage of 'TLS Web Server Authentication Certificate' were included:
+NSS appears to distrust the certificate for use as a TLS sever because the extend key usage extensions conflicts with the CA basic usage. Note the condensed output seems to contradict this given usages of 'Digital Signature', 'Key Encipherment' and extended usage of 'TLS Web Server Authentication Certificate' were included:
 
 ```console
 $ certutil -d /home/a211278l/.pki/nssdb -L -n personal_self_signed
@@ -428,7 +428,7 @@ $ certutil -d /home/a211278l/.pki/nssdb -L -n personal_self_signed
                 OID.2.5.29.37.0
 ```
 
-And `certutil` allows confirms the certficate is valid as an SSL CA:
+And `certutil` allows confirms the certificate is valid as an SSL CA:
 
 ```console
 $ certutil -d sql:$HOME/.pki/nssdb -V -u L -n personal_self_signed

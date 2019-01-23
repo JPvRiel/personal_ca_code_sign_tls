@@ -8,3 +8,4 @@ certs
 private
 pfx
 vars.env
+.vscode
