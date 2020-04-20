@@ -178,6 +178,18 @@ References:
 - [Bash script with config baked in](https://serverfault.com/questions/845766/generating-a-self-signed-cert-with-openssl-that-works-in-chrome-58/870832#870832)
 - [Keystore without a password](https://blog.jdriven.com/2015/10/keystore-without-a-password/)
 
+### Revoking a cert
+
+To kept the personal CA neat and keep record of deprecated old certificates that should not be trusted anymore, revocation is possible via:
+
+```bash
+  export CA_PASSPHRASE='<your own CA private key passphrase>'
+. .env
+openssl ca -config <(echo "$OPENSSL_CONF_MY_CA") -keyfile "$ROOT_CA_KEY" -passin env:CA_PASSPHRASE -revoke ./certs/<old cert file>.cert.pem -crl_reason cessationOfOperation
+```
+
+Since the CRL or OCSP endpoints are not published and made accessible this if fairly immaterial and doesn't add any real security benifit as a local personal code signing CA.
+
 ### Importing and trusting a personal CA
 
 Reference:
