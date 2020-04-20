@@ -11,7 +11,7 @@ For local use, self-signed certificates used to be a quick and useful alternativ
 - NSS (Network Security Services) used by Chrome and Firefox no longer trust a certificate as a CA for issuing TLS certificates when it also includes X509v3 extended key usage attributes.
 - Even when "Any Extended Key Usage" is included in the self-signed cert, as per RFC 5280, NSS won't allow the cert to be used for TLS authentication.
 
-An alternate approach is to run your own minimal separate CA root authority to sign certificates with specific purposes for TLS authentication or code signing. 
+An alternate approach is to run your own minimal separate CA root authority to sign certificates with specific purposes for TLS authentication or code signing.
 
 Since a minimal CA hierarchy is used, certificates for specific purposes can be issued:
 
@@ -45,7 +45,7 @@ Windows Defender Application Control can leverage code singing certificates. See
 
 Due to UEFI superceding BIOS for trusted boot protection against malware and rootkits, OS kernel boot binaries are typically signed. Linux distro's often have their boot-loaders signed by a CA. `pesign` caters for advanced Linux users who intend running secure boot with custom complied kernels or modules and this leverages a code singing certificate.
 
-As per [Does linux support signed binaries?](https://security.stackexchange.com/questions/138651/does-linux-support-signed-binaries), features to digitaly singing executables on Linux hasn't been overly popular. But various efforts like the Integrity Measurement Architecture (IMA) and (EVM) are progressing to extend the protection of secure boot beyond just the initial UEFI boot-loader. 
+As per [Does linux support signed binaries?](https://security.stackexchange.com/questions/138651/does-linux-support-signed-binaries), features to digitaly singing executables on Linux hasn't been overly popular. But various efforts like the Integrity Measurement Architecture (IMA) and (EVM) are progressing to extend the protection of secure boot beyond just the initial UEFI boot-loader.
 
 Related:
 
@@ -135,9 +135,9 @@ The certificate extensions of interest are:
 
 ```console
         X509v3 extensions:
-            X509v3 Key Usage: 
+            X509v3 Key Usage:
                 Digital Signature
-            X509v3 Extended Key Usage: 
+            X509v3 Extended Key Usage:
                 Code Signing, Microsoft Individual Code Signing
 
 ```
@@ -157,11 +157,11 @@ The certificate subject alternative names and key usage extensions of interest (
 
 ```console
         X509v3 extensions:
-            X509v3 Key Usage: 
+            X509v3 Key Usage:
                 Digital Signature, Key Encipherment
-            X509v3 Extended Key Usage: 
+            X509v3 Extended Key Usage:
                 TLS Web Server Authentication, TLS Web Client Authentication
-            X509v3 Subject Alternative Name: 
+            X509v3 Subject Alternative Name:
                 DNS:<HOSTNAME>, DNS:localhost, DNS:localhost.localdomain IP:127.0.0.1, IP Address:0:0:0:0:0:0:0:1
 ```
 
@@ -212,7 +212,7 @@ On Linux `nss` libs and `certutil` can help import a personal CA via the CLI:
 
 ```bash
 certutil -d sql:$HOME/.pki/nssdb -A -t 'CT,c,c' -n personal_root_ca -i ./ca/certs/personal_root_ca.cert.pem
-certutil -d /home/a211278l/.pki/nssdb -L -n personal_root_ca
+certutil -d ~/.pki/nssdb -L -n personal_root_ca
 ```
 
 As per `-t trustargs` described by [NSS Tools certutil
@@ -222,7 +222,7 @@ As per `-t trustargs` described by [NSS Tools certutil
 > - T    Trusted CA to issue client certificates (implies c)
 > - C    Trusted CA to issue server certificates (SSL only)
 
-Note the output of `certutil -d /home/a211278l/.pki/nssdb -L -n personal_root_ca` option helps confirm:
+Note the output of `certutil -d ~/.pki/nssdb -L -n personal_root_ca` option helps confirm:
 
 ```console
     Certificate Trust Flags:
@@ -400,7 +400,7 @@ Futhermore, during testing, without `anyExtendedKeyUsage` set, error code `-8102
 NSS appears to distrust the certificate for use as a TLS sever because the extend key usage extensions conflicts with the CA basic usage. Note the condensed output seems to contradict this given usages of 'Digital Signature', 'Key Encipherment' and extended usage of 'TLS Web Server Authentication Certificate' were included:
 
 ```console
-$ certutil -d /home/a211278l/.pki/nssdb -L -n personal_self_signed
+$ certutil -d ~/.pki/nssdb -L -n personal_self_signed
 ...
       Signed Extensions:
             Name: Certificate Subject Alt Name
@@ -458,7 +458,7 @@ Post testing cleanup:
 
 ```bash
 kill $openssl_pid
-certutil -d /home/a211278l/.pki/nssdb -D -n personal_self_signed
+certutil -d ~/.pki/nssdb -D -n personal_self_signed
 rm $HOSTNAME.*.pem
 rm $HOSTNAME.*.pfx
 ```
